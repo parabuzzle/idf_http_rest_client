@@ -1,0 +1,15 @@
+menu "HTTP REST Client"
+
+  config HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER
+    int "Max receive buffer"
+    default 1024
+    help
+      This is the maximum size of the receive buffer for HTTP REST client.
+
+  config HTTP_REST_CLIENT_MAX_SEND_BUFFER
+    int "Max send buffer"
+    default 1024
+    help
+      This is the maximum size of the send buffer for HTTP REST client.
+
+endmenu
