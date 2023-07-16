@@ -11,15 +11,17 @@ _feel free to open a Pull Request to add or fix things_
 ESP-IDF provides a robust [HTTP Client library](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_http_client.html)
 already, why would I need this library too?
 
-The answer is you don't need it. But because the provided client library is robust, it also means its a bit complicated and for most people, we only need some simple http operations for interacting with REST endpoints. You shouldn't need to know how to managed chunked vs non-chunked requests or how to construct a post request with the proper headers.
+The answer is you don't need it. You probably don't even want it. But because the provided client library is robust, it also means its a bit complicated and for most people, we only need some simple http operations for interacting with REST endpoints. You shouldn't need to know how to manage chunked vs non-chunked responses or how to construct construct the required connection config to post a json object. I just want the ENTIRE response body loaded in a buffer I provide to do with what I want. And i don't want to copy around 40 lines of code to do it!
+
+I made this for me. If you find use in it, GREAT! If you want to improve it for you, EVEN BETTER!
 
 # Requirements
 
-This was developed and tested on ESP-IDF 5.x (no guarantee it will work in earlier or future versions)
+This was developed and tested on ESP-IDF 5.0.2 and 5.1 (no guarantee it will work in earlier or future versions)
 
-You will alos need to update your Max HTTP Request Header Length in the menuconfig or `sdkconfig` to something a bit higher than the default `512`.
+You will also will likely need to update your Max HTTP Request Header Length in the menuconfig or `sdkconfig` to something a bit higher than the default `512`.
 
-_Note: Most modern browsers use something between `4096` and `8192` for reference. I find that `2048` is about right for most standard REST services, but tune this for your requirements._
+_Note: Most modern browsers use something between `4096` and `8192` for reference. I find that `2048` is about right for most standard REST services out in the wild, but tune this for your requirements._
 
 # Installation
 
@@ -43,6 +45,41 @@ git submodule add https://github.com/parabuzzle/idf_http_rest_client.git
 # Configuration
 
 All configuration is provided through `menuconfig` and the Kconfig.projbuild file.
+
+# Usage
+
+You can find a runnable working example in the [examples](/examples) directory
+
+This is a basic idea of how it works:
+
+_yes, its literally a single line to load the buffer with the response!_
+
+```c
+#include "http_rest_client.h"
+
+void app_main(void)
+{
+  char *response_body; // where we put the response
+
+  while (1)
+  {
+    response_body = malloc(1024); // allocate some memory
+
+    // do the request
+    ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", response_body, 1024));
+
+    // do something with the data
+    printf(response_body);
+
+    // clean up
+    free(response_body);
+
+    // wait and loop
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+
+}
+```
 
 # License
 
