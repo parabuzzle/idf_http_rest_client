@@ -36,17 +36,22 @@
 #include "esp_netif.h"
 #include "esp_wifi.h"
 
+#define WIFI_CONNECTED_BIT (1 << 0)
+#define WIFI_GOT_IP_BIT (1 << 1)
+
+static EventGroupHandle_t wifi_event_group;
+
 void wifi_event_handler(void *event_handler_arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
   switch (event_id)
   {
   case WIFI_EVENT_STA_START:
-    ESP_LOGI(TAG, "WiFi station connecting...");
+    ESP_LOGI("WIFI_EVENT", "WiFi station connecting...");
     xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
     (void)esp_wifi_connect();
     break;
   case WIFI_EVENT_STA_DISCONNECTED:
-    ESP_LOGI(TAG, "WiFi station disconnected");
+    ESP_LOGI("WIFI_EVENT", "WiFi station disconnected");
     xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
     (void)esp_wifi_connect();
     break;
@@ -61,7 +66,7 @@ void ip_event_handler(void *event_handler_arg, esp_event_base_t event_base, int3
   switch (event_id)
   {
   case IP_EVENT_STA_GOT_IP:
-    ESP_LOGD(TAG, "WiFi station got IP");
+    ESP_LOGD("WIFI_EVENT", "WiFi station got IP");
     xEventGroupSetBits(wifi_event_group, WIFI_GOT_IP_BIT);
     break;
   default:

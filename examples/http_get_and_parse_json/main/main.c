@@ -25,6 +25,8 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
+#include <inttypes.h>
 #include "esp_system.h"
 #include "esp_netif.h"
 #include "esp_event.h"
@@ -38,47 +40,51 @@
 #include "http_rest_client.h"
 #include "cJSON.h"
 
-#define WIFI_CONNECTED_BIT (1 << 0)
-#define WIFI_GOT_IP_BIT (1 << 1)
 #define URL "https://jsonplaceholder.typicode.com/todos/1"
 
 #define WIFI_SSID "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
 
 static const char *TAG = "main";
-static EventGroupHandle_t wifi_event_group;
 
 void app_main(void)
 {
-  ESP_LOGI(TAG, "Starting app_main...")
+  // create some variables we'll need
+  esp_err_t ret = ESP_OK;
+  char *response_body;
+
+  ESP_LOGI(TAG, "Starting app_main...");
+
   // initialize wifi event group
   wifi_event_group = xEventGroupCreate();
 
-  /* Initialize NVS flash */
-  esp_err_t ret = nvs_flash_init();
-
+  // Initialize NVS flash for wifi
+  ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
   {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
 
+  // Check if wer're good to proceed
   ESP_ERROR_CHECK(ret);
 
-  /* Initialize WiFi */
-  ESP_ERROR_CHECK(esp_netif_init());
+  // Create the default event loop for WiFi driver
   ESP_ERROR_CHECK(esp_event_loop_create_default());
-  esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-  assert(sta_netif);
 
+  // Initialize network interface for WiFi Station mode
+  ESP_ERROR_CHECK(esp_netif_init());
+  (void)esp_netif_create_default_wifi_sta();
+
+  // Configure WiFi radio
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
-  /* Register WiFi event handler */
+  // Register WiFi event handlers
   ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
   ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
 
-  /* Set WiFi configuration */
+  // Set WiFi Station configuration
   wifi_config_t wifi_config = {
       .sta = {
           .ssid = WIFI_SSID,
@@ -90,34 +96,36 @@ void app_main(void)
       },
   };
 
+  // Set WiFi mode to Station mode
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
-  /* Start WiFi */
+  // Start the WiFi driver
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_start());
 
-  /* Wait for WiFi connection and ip address before continuing */
+  // Wait for WiFi connection and ip address before continuing
   ESP_LOGI(TAG, "Waiting for WiFi connection...");
   (void)xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT | WIFI_GOT_IP_BIT, pdFALSE, pdTRUE, portMAX_DELAY);
 
   ESP_LOGI(TAG, "WiFi connected");
 
-  // start main loop
   ESP_LOGI(TAG, "Starting Main Loop...");
 
-  char response_body[CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER] = {0};
-
+  // start main loop
   while (1)
   {
-    // clear the response buffer before starting to prevent old data from being parsed
-    memset(response_body, 0, CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
+    // Allocate memory on the heap for the response
+    response_body = malloc(CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
 
     // get the response from the server
-    esp_err_t err = http_rest_client_get(URL, response_body, CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
+    ESP_LOGI(TAG, "Fetching Data from URL: %s", URL);
+    ret = http_rest_client_get(URL, response_body, CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
 
-    if (err != ESP_OK)
+    ESP_LOGI(TAG, "Raw Response string:\n%s", response_body);
+
+    if (ret != ESP_OK)
     {
-      ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+      ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(ret));
     }
 
     // parse the response
@@ -130,10 +138,13 @@ void app_main(void)
     }
 
     // print the response
-    ESP_LOGI(TAG, "RESPONSE: %s", cJSON_Print(response));
+    ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
 
     // clean up json
     cJSON_Delete(response);
+
+    // clean up memory
+    free(response_body);
 
     ESP_LOGI(TAG, "Looping in 1 sec...");
     vTaskDelay(1000 / portTICK_PERIOD_MS);
