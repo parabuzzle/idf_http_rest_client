@@ -25,8 +25,7 @@
  * SOFTWARE.
  */
 
-#ifndef HTTP_REST_CLIENT_H
-#define HTTP_REST_CLIENT_H
+#pragma once
 
 #include "esp_log.h"
 #include "esp_tls.h"
@@ -38,7 +37,4 @@
 
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len);
 esp_err_t http_rest_client_deinit_cert(void);
-
 esp_err_t http_rest_client_get(char *url, char *response, size_t response_len);
-
-#endif // HTTP_REST_CLIENT_H
