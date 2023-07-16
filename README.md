@@ -108,6 +108,42 @@ void app_main(void)
 }
 ```
 
+## Do you have a JSON Example?
+
+You Betcha'
+
+You can send that response object directly to cJSON:
+
+```c
+
+#include "http_rest_client.h"
+#include "cJSON"
+
+void app_main(void)
+{
+  char *response_body; // where we put the response
+  response_body = malloc(1024); // allocate some memory
+
+  // do the request
+  ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", response_body, 1024));
+
+  cJSON *json = parse(response);
+
+  if (json == NULL)
+  {
+    printf("Error parsing JSON");
+  }
+  else
+  {
+    printf(cJSON_Print(json));
+  }
+
+  // clean up
+  free(response_body);
+}
+
+```
+
 # License
 
 MIT License
