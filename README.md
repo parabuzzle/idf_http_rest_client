@@ -2,7 +2,7 @@
 
 A Client library for ESP32 and [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/).
 
-**This library is far from complete! It's missing some core features for REST (like DELETE and HEAD) and its probably fully of lurking C rookie mistakes. I only created it to abstract away some of the boilerplate of working with REST endpoints based on the ESP-IDF docs**
+**This library is far from complete! It's missing some core features for REST (like DELETE and HEAD) and its probably full of lurking C rookie mistakes, security holes, and more bugs than the amazon rainforest. I only created it to abstract away some of the boilerplate of working with REST endpoints based on the ESP-IDF docs**
 
 _feel free to open a Pull Request to add or fix things_
 
@@ -43,3 +43,27 @@ git submodule add https://github.com/parabuzzle/idf_http_rest_client.git
 # Configuration
 
 All configuration is provided through `menuconfig` and the Kconfig.projbuild file.
+
+# License
+
+MIT License
+
+Copyright (c) 2023 Michael Heijmans
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
