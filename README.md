@@ -11,7 +11,7 @@ _feel free to open a Pull Request to add or fix things_
 ESP-IDF provides a robust [HTTP Client library](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_http_client.html)
 already, why would I need this library too?
 
-The answer is you don't need it. You probably don't even want it. But because the provided client library is robust, it also means its a bit complicated and for most people, we only need some simple http operations for interacting with REST endpoints. You shouldn't need to know how to manage chunked vs non-chunked responses or how to construct construct the required connection config to post a json object. I just want the ENTIRE response body loaded in a buffer I provide to do with what I want. And i don't want to copy around 40 lines of code to do it!
+The answer is you don't need it. You probably don't even want it. But because the provided client library is robust, it also means its a bit complicated and for most people, we only need some simple http operations for interacting with REST endpoints. You shouldn't need to know how to manage chunked vs non-chunked responses or how to construct the required connection config to post a json object. I just want the ENTIRE response body loaded in a buffer I provide to do with what I want. And i don't want to copy around 40 lines of code for every request to do it!
 
 I made this for me. If you find use in it, GREAT! If you want to improve it for you, EVEN BETTER!
 
@@ -78,6 +78,33 @@ void app_main(void)
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 
+}
+```
+
+## HTTPS?
+
+Yep!
+
+If you have the mbed-tls certificate bundle enabled for the chip in sdkconfig, I just load it in automatically. You don't need to do anything to do https requests aside from make sure `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE` is enabled.
+
+What if you want to provide your own cert bundle pem or you can't use the mbed-tls bundle? I got you beau!
+
+You just need to initialize the pem in the library like this:
+
+```c
+#include "http_rest_client.h"
+
+void app_main(void)
+{
+  char *cert = "----begin certificate--- etc"
+
+  // initialize a cert bundle
+  ESP_ERROR_CHECK(http_rest_client_init_cert(cert, strlen(cert)));
+
+  // go about your business...
+
+  // remove the attached bundle ... why? I don't know... but you _can_
+  ESP_ERROR_CHECK(http_rest_client_deinit_cert());
 }
 ```
 

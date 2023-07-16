@@ -62,7 +62,6 @@ esp_err_t http_rest_client_get(char *url, char *response, size_t response_len)
 
   esp_err_t ret = ESP_OK;
 
-  // char response_buffer[CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER];
   static esp_http_client_handle_t client;
 
   esp_http_client_config_t config = {
@@ -94,10 +93,7 @@ esp_err_t http_rest_client_get(char *url, char *response, size_t response_len)
     return ret;
   }
 
-  // ESP_LOGD(TAG, "DATA BUFFER LEN: %d", strlen(response_buffer));
-
   ESP_LOGD(TAG, "Cleaning up client before returning");
-  // strncpy(response, response_buffer, response_len);
   esp_http_client_cleanup(client);
   return ret;
 }
