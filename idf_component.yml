@@ -15,7 +15,7 @@ issues: "https://github.com/parabuzzle/idf_http_rest_client/issues"
 #  esp-idf: ">=5.0"
 
 examples:
-  - path: "https://github.com/parabuzzle/idf_http_rest_client/examples/simple_get_request"
+  - path: "https://github.com/parabuzzle/idf_http_rest_client/tree/main/examples/http_get_and_parse_json"
 
 files:
   exclude:
