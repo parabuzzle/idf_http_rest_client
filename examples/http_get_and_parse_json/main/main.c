@@ -115,11 +115,12 @@ void app_main(void)
   while (1)
   {
     // Allocate memory on the heap for the response
-    response_body = malloc(CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
+    response_body = malloc(1024);
+    int status_code = 0;
 
     // get the response from the server
     ESP_LOGI(TAG, "Fetching Data from URL: %s", URL);
-    ret = http_rest_client_get(URL, response_body, CONFIG_HTTP_REST_CLIENT_MAX_RECEIVE_BUFFER);
+    ret = http_rest_client_get(URL, &status_code, response_body, 1024 - 1);
 
     ESP_LOGI(TAG, "Raw Response string:\n%s", response_body);
 
@@ -130,20 +131,27 @@ void app_main(void)
     else
     {
 
-      // parse the response
-      cJSON *response = cJSON_Parse(response_body);
-
-      int userId = cJSON_GetObjectItem(response, "userId")->valueint;
-      if (userId == 1)
+      if (status_code != 200)
       {
-        ESP_LOGI(TAG, "Parsed correctly!");
+        ESP_LOGE(TAG, "HTTP GET request failed with status code: %d", status_code);
       }
+      else
+      {
+        // parse the response
+        cJSON *response = cJSON_Parse(response_body);
 
-      // print the response
-      ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
+        int userId = cJSON_GetObjectItem(response, "userId")->valueint;
+        if (userId == 1)
+        {
+          ESP_LOGI(TAG, "Parsed correctly!");
+        }
 
-      // clean up json
-      cJSON_Delete(response);
+        // print the response
+        ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
+
+        // clean up json
+        cJSON_Delete(response);
+      }
     }
     // clean up memory
     free(response_body);

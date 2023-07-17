@@ -60,13 +60,17 @@ _yes, its literally a single line to load the buffer with the response!_
 void app_main(void)
 {
   char *response_body; // where we put the response
+  int status_code = 0;
 
   while (1)
   {
     response_body = malloc(1024); // allocate some memory
 
     // do the request
-    ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", response_body, 1024));
+    ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", &status_code, response_body, 1024-1));
+
+    // print response status
+    sprintf("Status Code %d", status_code);
 
     // do something with the data
     printf(response_body);
@@ -122,20 +126,24 @@ You can send that response object directly to cJSON:
 void app_main(void)
 {
   char *response_body; // where we put the response
+  int status_code = 0; // status code from server
   response_body = malloc(1024); // allocate some memory
 
   // do the request
-  ESP_ERROR_CHECK(http_rest_client_get("https://rickandmortyapi.com/api/character/1", response_body, 1024));
+  ESP_ERROR_CHECK(http_rest_client_get("https://rickandmortyapi.com/api/character/1", &status_code, response_body, 1024));
 
-  cJSON *json = parse(response);
+  if (status_code == 200)
+  {
+    cJSON *json = parse(response);
 
-  if (json == NULL)
-  {
-    printf("Error parsing JSON");
-  }
-  else
-  {
-    printf(cJSON_Print(json));
+    if (json == NULL)
+    {
+      printf("Error parsing JSON");
+    }
+    else
+    {
+      printf(cJSON_Print(json));
+    }
   }
 
   // clean up
