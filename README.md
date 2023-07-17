@@ -125,7 +125,7 @@ void app_main(void)
   response_body = malloc(1024); // allocate some memory
 
   // do the request
-  ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", response_body, 1024));
+  ESP_ERROR_CHECK(http_rest_client_get("https://rickandmortyapi.com/api/character/1", response_body, 1024));
 
   cJSON *json = parse(response);
 

@@ -127,22 +127,24 @@ void app_main(void)
     {
       ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(ret));
     }
-
-    // parse the response
-    cJSON *response = cJSON_Parse(response_body);
-
-    int userId = cJSON_GetObjectItem(response, "userId")->valueint;
-    if (userId == 1)
+    else
     {
-      ESP_LOGI(TAG, "Parsed correctly!");
+
+      // parse the response
+      cJSON *response = cJSON_Parse(response_body);
+
+      int userId = cJSON_GetObjectItem(response, "userId")->valueint;
+      if (userId == 1)
+      {
+        ESP_LOGI(TAG, "Parsed correctly!");
+      }
+
+      // print the response
+      ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
+
+      // clean up json
+      cJSON_Delete(response);
     }
-
-    // print the response
-    ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
-
-    // clean up json
-    cJSON_Delete(response);
-
     // clean up memory
     free(response_body);
 
