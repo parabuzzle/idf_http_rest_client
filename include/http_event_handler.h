@@ -30,4 +30,10 @@
 #include "esp_log.h"
 #include "esp_http_client.h"
 
+typedef struct http_rest_recv_buffer_t
+{
+  char *buffer;
+  size_t buffer_len;
+} http_rest_recv_buffer_t;
+
 esp_err_t http_event_handler(esp_http_client_event_t *event_data);

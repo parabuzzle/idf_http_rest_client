@@ -57,19 +57,33 @@ esp_err_t http_rest_client_deinit_cert(void)
   return ESP_OK;
 }
 
-esp_err_t http_rest_client_get(char *url, char *response, size_t response_len)
+esp_err_t http_rest_client_get(char *url, int *status_code, void *response, size_t response_len)
 {
 
   esp_err_t ret = ESP_OK;
 
-  static esp_http_client_handle_t client;
+  esp_http_client_handle_t client;
+
+  ESP_LOGD(TAG, "Initializing client");
+  http_rest_recv_buffer_t http_rest_recv_buffer = {
+      .buffer = NULL,
+      .buffer_len = 0,
+  };
+
+  if (response != NULL)
+  {
+    ESP_LOGV(TAG, "clearing response buffer");
+    memset(response, 0, (size_t)response_len);
+    http_rest_recv_buffer.buffer = response;
+    http_rest_recv_buffer.buffer_len = (size_t)response_len;
+  }
 
   esp_http_client_config_t config = {
       .url = url,
       .method = HTTP_METHOD_GET,
       .event_handler = http_event_handler,
       .user_agent = "IDF HTTP REST Client/0.1",
-      .user_data = response,
+      .user_data = &http_rest_recv_buffer,
   };
 
 #ifdef CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
@@ -93,7 +107,15 @@ esp_err_t http_rest_client_get(char *url, char *response, size_t response_len)
     return ret;
   }
 
+  if (status_code != NULL)
+  {
+    int status = esp_http_client_get_status_code(client);
+    ESP_LOGD(TAG, "HTTP GET Status = %d", status);
+    *status_code = status;
+  }
+
   ESP_LOGD(TAG, "Cleaning up client before returning");
   esp_http_client_cleanup(client);
+
   return ret;
 }

@@ -37,4 +37,4 @@
 
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len);
 esp_err_t http_rest_client_deinit_cert(void);
-esp_err_t http_rest_client_get(char *url, char *response, size_t response_len);
+esp_err_t http_rest_client_get(char *url, int *status_code, void *response, size_t response_len);
