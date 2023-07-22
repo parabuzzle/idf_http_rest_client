@@ -2,7 +2,7 @@
 
 A Client library for ESP32 and [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/).
 
-**This library is far from complete! It's missing some core features for REST (like DELETE and HEAD) and its probably full of lurking C rookie mistakes, security holes, and more bugs than the amazon rainforest. I only created it to abstract away some of the boilerplate of working with REST endpoints based on the ESP-IDF docs**
+**This library is far from complete! It's missing some core features for REST (like authentication...) and its probably full of lurking C rookie mistakes, security holes, and more bugs than the amazon rainforest. I only created it to abstract away some of the boilerplate of working with REST endpoints based on the ESP-IDF docs**
 
 _feel free to open a Pull Request to add or fix things_
 
@@ -59,24 +59,22 @@ _yes, its literally a single line to load the buffer with the response!_
 
 void app_main(void)
 {
-  char *response_body; // where we put the response
-  int status_code = 0;
 
   while (1)
   {
-    response_body = malloc(1024); // allocate some memory
+    http_rest_recv_buffer_t response_buffer = {0};
 
     // do the request
-    ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", &status_code, response_body, 1024-1));
+    ESP_ERROR_CHECK(http_rest_client_get("https://catoftheday.com/", &response_buffer));
 
     // print response status
-    sprintf("Status Code %d", status_code);
+    sprintf("Status Code %d", response_buffer.status_code);
 
     // do something with the data
-    printf(response_body);
+    printf(response_buffer.buffer);
 
     // clean up
-    free(response_body);
+    http_rest_client_cleanup(&response_buffer);
 
     // wait and loop
     vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -120,34 +118,58 @@ You can send that response object directly to cJSON:
 
 ```c
 
-#include "http_rest_client.h"
-#include "cJSON"
+#include "http_rest_json_client.h"
 
 void app_main(void)
 {
-  char *response_body; // where we put the response
-  int status_code = 0; // status code from server
-  response_body = malloc(1024); // allocate some memory
+
+  http_rest_recv_json_t response_buffer = {0};
 
   // do the request
-  ESP_ERROR_CHECK(http_rest_client_get("https://rickandmortyapi.com/api/character/1", &status_code, response_body, 1024));
+  ESP_ERROR_CHECK(http_rest_client_get_json("https://rickandmortyapi.com/api/character/1", &response_buffer));
 
-  if (status_code == 200)
+  if (response_buffer.status_code != 200){
+    ESP_LOGE(TAG, "an http error occured: %d", response_buffer.status_code);
+  }
+  else
   {
-    cJSON *json = parse(response);
-
-    if (json == NULL)
-    {
-      printf("Error parsing JSON");
-    }
-    else
-    {
-      printf(cJSON_Print(json));
-    }
+    char *jsonString = cJSON_Print(response_buffer.json);
+    ESP_LOGI(TAG, "Response: %s", jsonString);
+    free(jsonString);
   }
 
-  // clean up
-  free(response_body);
+  http_rest_client_cleanup_json(&response_buffer);
+}
+
+```
+
+What if you want to post json data? yea, it does that too:
+
+```c
+#include "http_rest_json_client.h"
+
+void app_main(void)
+{
+
+  http_rest_recv_json_t response_buffer = {0};
+  cJSON *json_body = cJSON_CreateObject();
+  cJSON_AddStringToObject(json_body, "hello", "world");
+
+  // do the request
+  ESP_ERROR_CHECK(http_rest_client_get_json("https://httpbin.org/anything", json_body, &response_buffer));
+
+  if (response_buffer.status_code != 200){
+    ESP_LOGE(TAG, "an http error occured: %d", response_buffer.status_code);
+  }
+  else
+  {
+    char *jsonString = cJSON_Print(response_buffer.json);
+    ESP_LOGI(TAG, "Response: %s", jsonString);
+    free(jsonString);
+    cJSON_Delete(json_body);
+  }
+
+  http_rest_client_cleanup_json(&response_buffer);
 }
 
 ```
