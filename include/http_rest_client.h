@@ -30,11 +30,19 @@
 #include "esp_log.h"
 #include "esp_tls.h"
 #include "esp_http_client.h"
+#include "http_rest_types.h"
 #include "http_event_handler.h"
 #if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
 #include "esp_crt_bundle.h"
 #endif
 
+/* Certificate handling */
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len);
 esp_err_t http_rest_client_deinit_cert(void);
-esp_err_t http_rest_client_get(char *url, int *status_code, void *response, size_t response_len);
+
+esp_err_t http_rest_client_get(char *url, http_rest_recv_buffer_t *http_rest_recv_buffer);
+esp_err_t http_rest_client_delete(char *url, http_rest_recv_buffer_t *http_rest_recv_buffer);
+esp_err_t http_rest_client_post(char *url, char *body_data, http_rest_recv_buffer_t *http_rest_recv_buffer);
+esp_err_t http_rest_client_put(char *url, char *body_data, http_rest_recv_buffer_t *http_rest_recv_buffer);
+
+void http_rest_client_cleanup(http_rest_recv_buffer_t *http_rest_recv_buffer);

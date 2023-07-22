@@ -31,32 +31,32 @@ static const char *TAG = "http_rest_event_handler";
 
 esp_err_t http_event_handler(esp_http_client_event_t *event_data)
 {
-  http_rest_recv_buffer_t *response_buffer = (http_rest_recv_buffer_t *)event_data->user_data;
-  char *rcv_buffer = (char *)response_buffer->buffer;
-  size_t rcv_buffer_len = response_buffer->buffer_len;
-
-  if (rcv_buffer == 0)
-  {
-    return ESP_OK;
-  }
-
   switch (event_data->event_id)
   {
   case HTTP_EVENT_ON_DATA:
+  {
+    http_rest_recv_buffer_t *response_buffer = (http_rest_recv_buffer_t *)event_data->user_data;
+
     ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", event_data->data_len);
     ESP_LOGV(TAG, "DATA: %s", (char *)event_data->data);
 
-    if (rcv_buffer_len > 0)
-    {
-      if (event_data->data_len + strlen(rcv_buffer) >= rcv_buffer_len)
-      {
-        ESP_LOGE(TAG, "Receive buffer too small, needed %d, got %d", event_data->data_len, rcv_buffer_len);
-        return ESP_FAIL;
-      }
-      ESP_LOGV(TAG, "Appending data to buffer");
-      strncat(rcv_buffer, (char *)event_data->data, event_data->data_len);
-    }
-    break;
+    // Increase the buffer size to fit the new data
+    response_buffer->buffer = realloc(response_buffer->buffer, response_buffer->buffer_len + event_data->data_len + 1);
+    ESP_LOGV(TAG, "Buffer realloced to %d bytes", response_buffer->buffer_len + event_data->data_len + 1);
+
+    // Copy the new data to the buffer
+    memcpy(response_buffer->buffer + response_buffer->buffer_len, (uint8_t *)event_data->data, event_data->data_len);
+    ESP_LOGV(TAG, "Data copied to buffer");
+
+    // Increase the buffer length
+    response_buffer->buffer_len += event_data->data_len;
+    ESP_LOGV(TAG, "Buffer length increased to %d bytes", response_buffer->buffer_len);
+
+    // Add a null terminator to the end of the buffer
+    response_buffer->buffer[response_buffer->buffer_len] = '\0';
+    ESP_LOGV(TAG, "Null terminator added to buffer");
+  }
+  break;
 
   default:
     ESP_LOGV(TAG, "HTTP_EVENT %d", event_data->event_id);

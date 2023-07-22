@@ -1,5 +1,5 @@
 /*
- * @file http_event_handler.h
+ * @file http_rest_json_client.h
  * @author Michael Heijmans
  *
  * MIT License
@@ -27,10 +27,12 @@
 
 #pragma once
 
-#include <string.h>
-#include <stdio.h>
-#include "esp_log.h"
-#include "esp_http_client.h"
-#include "http_rest_types.h"
+#include "http_rest_client.h"
+#include "cJSON.h"
 
-esp_err_t http_event_handler(esp_http_client_event_t *event_data);
+esp_err_t http_rest_client_get_json(char *url, http_rest_recv_json_t *http_rest_recv_json);
+esp_err_t http_rest_client_delete_json(char *url, http_rest_recv_json_t *http_rest_recv_json);
+esp_err_t http_rest_client_post_json(char *url, cJSON *body_json, http_rest_recv_json_t *http_rest_recv_json);
+esp_err_t http_rest_client_put_json(char *url, cJSON *body_json, http_rest_recv_json_t *http_rest_recv_json);
+
+void http_rest_client_cleanup_json(http_rest_recv_json_t *http_rest_recv_json);

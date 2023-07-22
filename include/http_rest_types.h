@@ -1,5 +1,5 @@
 /*
- * @file http_event_handler.h
+ * @file http_rest_types.h
  * @author Michael Heijmans
  *
  * MIT License
@@ -27,10 +27,19 @@
 
 #pragma once
 
-#include <string.h>
-#include <stdio.h>
-#include "esp_log.h"
-#include "esp_http_client.h"
-#include "http_rest_types.h"
+#include "cJSON.h"
 
-esp_err_t http_event_handler(esp_http_client_event_t *event_data);
+typedef struct http_rest_recv_buffer_t
+{
+  uint8_t *buffer;
+  int buffer_len;
+  int status_code;
+
+} http_rest_recv_buffer_t;
+
+typedef struct http_rest_recv_json_t
+{
+  cJSON *json;
+  int status_code;
+
+} http_rest_recv_json_t;
