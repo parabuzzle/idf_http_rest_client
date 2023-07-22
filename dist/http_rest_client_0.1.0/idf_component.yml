@@ -1,0 +1,18 @@
+description: A simple JSON capable REST HTTP Client for ESP32 IDF
+documentation: https://github.com/parabuzzle/idf_http_rest_client
+files:
+  exclude:
+  - .gitignore
+  - .git
+  - examples
+issues: https://github.com/parabuzzle/idf_http_rest_client/issues
+repository: https://github.com/parabuzzle/idf_http_rest_client
+tags:
+- HTTP
+- HTTP_Client
+- REST
+- JSON
+- ESP32
+- IDF
+url: https://github.com/parabuzzle/idf_http_rest_client
+version: 0.1.0

@@ -37,7 +37,7 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 #include "event_handlers.h"
-#include "http_rest_json_client.h"
+#include "http_rest_client.h"
 #include "cJSON.h"
 
 #define URL "https://jsonplaceholder.typicode.com/todos/1"
@@ -114,17 +114,19 @@ void app_main(void)
   // start main loop
   while (1)
   {
-    // create a buffer to store the response
-    http_rest_recv_json_t response_buffer = {0};
+    // Allocate memory on the heap for the response
+    response_body = malloc(1024);
+    int status_code = 0;
 
     // get the response from the server
     ESP_LOGI(TAG, "Fetching Data from URL: %s", URL);
-    ret = http_rest_client_get_json(URL, &response_buffer);
+    ret = http_rest_client_get(URL, &status_code, response_body, 1024 - 1);
+
+    ESP_LOGI(TAG, "Raw Response string:\n%s", response_body);
 
     if (ret != ESP_OK)
     {
       ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(ret));
-      http_rest_client_cleanup_json(&response_buffer);
     }
     else
     {
@@ -132,17 +134,28 @@ void app_main(void)
       if (status_code != 200)
       {
         ESP_LOGE(TAG, "HTTP GET request failed with status code: %d", status_code);
-        http_rest_client_cleanup_json(&response_buffer);
       }
       else
       {
-        char *jsonString = cJSON_Print(response_buffer.json);
-        ESP_LOGI(TAG, "Response: %s", jsonString);
+        // parse the response
+        cJSON *response = cJSON_Parse(response_body);
 
-        free(jsonString);
-        http_rest_client_cleanup_json(&response_buffer);
+        int userId = cJSON_GetObjectItem(response, "userId")->valueint;
+        if (userId == 1)
+        {
+          ESP_LOGI(TAG, "Parsed correctly!");
+        }
+
+        // print the response
+        ESP_LOGI(TAG, "Response JSON:\n%s", cJSON_Print(response));
+
+        // clean up json
+        cJSON_Delete(response);
       }
     }
+    // clean up memory
+    free(response_body);
+
     ESP_LOGI(TAG, "Looping in 1 sec...");
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
