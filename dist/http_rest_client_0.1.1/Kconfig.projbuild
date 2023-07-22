@@ -1,9 +1,0 @@
-menu "HTTP REST Client"
-
-  config HTTP_REST_CLIENT_USER_AGENT
-    string "User Agent"
-    default "IDF HTTP REST Client/1.0"
-    help
-      This is the User Agent string to be used by the client.
-
-endmenu
