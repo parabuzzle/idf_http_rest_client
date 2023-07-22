@@ -43,7 +43,7 @@ esp_err_t http_rest_client_get_json(char *url, http_rest_recv_json_t *http_rest_
     return ret;
   }
 
-  if (http_rest_recv_buffer.status_code != 200)
+  if (http_rest_recv_buffer.status_code >= 300)
   {
     ESP_LOGE(TAG, "HTTP GET request failed with status code %d", http_rest_recv_buffer.status_code);
     return ESP_FAIL;
@@ -65,6 +65,7 @@ esp_err_t http_rest_client_get_json(char *url, http_rest_recv_json_t *http_rest_
   }
 
   http_rest_recv_json->json = json;
+  http_rest_recv_json->status_code = http_rest_recv_buffer.status_code;
 
   ESP_LOGD(TAG, "JSON parsed");
 
@@ -89,7 +90,7 @@ esp_err_t http_rest_client_delete_json(char *url, http_rest_recv_json_t *http_re
     return ret;
   }
 
-  if (http_rest_recv_buffer.status_code != 200)
+  if (http_rest_recv_buffer.status_code >= 300)
   {
     ESP_LOGE(TAG, "HTTP GET request failed with status code %d", http_rest_recv_buffer.status_code);
     return ESP_FAIL;
@@ -111,6 +112,7 @@ esp_err_t http_rest_client_delete_json(char *url, http_rest_recv_json_t *http_re
   }
 
   http_rest_recv_json->json = json;
+  http_rest_recv_json->status_code = http_rest_recv_buffer.status_code;
 
   ESP_LOGD(TAG, "JSON parsed");
 
@@ -139,7 +141,7 @@ esp_err_t http_rest_client_post_json(char *url, cJSON *body_json, http_rest_recv
     return ret;
   }
 
-  if (http_rest_recv_buffer.status_code != 200)
+  if (http_rest_recv_buffer.status_code >= 300)
   {
     ESP_LOGE(TAG, "HTTP POST request failed with status code %d", http_rest_recv_buffer.status_code);
     return ESP_FAIL;
@@ -161,6 +163,7 @@ esp_err_t http_rest_client_post_json(char *url, cJSON *body_json, http_rest_recv
   }
 
   http_rest_recv_json->json = json;
+  http_rest_recv_json->status_code = http_rest_recv_buffer.status_code;
 
   ESP_LOGD(TAG, "JSON parsed");
 
@@ -189,7 +192,11 @@ esp_err_t http_rest_client_put_json(char *url, cJSON *body_json, http_rest_recv_
     return ret;
   }
 
-  if (http_rest_recv_buffer.status_code != 200)
+  if (http_rest_recv_buffer.status_code >= 300)
+  {
+    ESP_LOGE(TAG, "HTTP POST request failed with status code %d", http_rest_recv_buffer.status_code);
+    return ESP_FAIL;
+  }
   {
     ESP_LOGE(TAG, "HTTP POST request failed with status code %d", http_rest_recv_buffer.status_code);
     return ESP_FAIL;
@@ -211,6 +218,7 @@ esp_err_t http_rest_client_put_json(char *url, cJSON *body_json, http_rest_recv_
   }
 
   http_rest_recv_json->json = json;
+  http_rest_recv_json->status_code = http_rest_recv_buffer.status_code;
 
   ESP_LOGD(TAG, "JSON parsed");
 
@@ -226,6 +234,7 @@ void http_rest_client_cleanup_json(http_rest_recv_json_t *http_rest_recv_json)
   if (http_rest_recv_json->json != NULL)
   {
     cJSON_Delete(http_rest_recv_json->json);
+    http_rest_recv_json->status_code = 0;
   }
   ESP_LOGD(TAG, "Cleaned up http_rest_recv_json");
 }
