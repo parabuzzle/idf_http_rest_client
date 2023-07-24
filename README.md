@@ -156,7 +156,7 @@ void app_main(void)
   cJSON_AddStringToObject(json_body, "hello", "world");
 
   // do the request
-  ESP_ERROR_CHECK(http_rest_client_get_json("https://httpbin.org/anything", json_body, &response_buffer));
+  ESP_ERROR_CHECK(http_rest_client_post_json("https://httpbin.org/anything", json_body, &response_buffer));
 
   if (response_buffer.status_code != 200){
     ESP_LOGE(TAG, "an http error occured: %d", response_buffer.status_code);
