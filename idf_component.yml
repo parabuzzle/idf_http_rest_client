@@ -6,13 +6,11 @@ tags:
   - JSON
   - ESP32
   - IDF
-version: "0.1.2"
+version: "0.1.3"
 url: "https://github.com/parabuzzle/idf_http_rest_client"
 repository: "https://github.com/parabuzzle/idf_http_rest_client"
 documentation: "https://github.com/parabuzzle/idf_http_rest_client"
 issues: "https://github.com/parabuzzle/idf_http_rest_client/issues"
-#dependencies:
-#  esp-idf: ">=5.0"
 
 files:
   exclude:
