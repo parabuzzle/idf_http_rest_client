@@ -28,7 +28,7 @@ _Note: Most modern browsers use something between `4096` and `8192` for referenc
 Using the IDF Component Registry (Recommended)
 
 ```
-idf.py add-dependency "parabuzzle/http_rest_client^0.1.0"
+idf.py add-dependency "parabuzzle/http_rest_client^0.1.4"
 ```
 
 Clone a local copy to your project
