@@ -31,6 +31,33 @@ static const char *TAG = "http_rest_client";
 
 static char *certificate;
 
+
+char* headers[100];
+char* values[100];
+int headers_c = 0;
+
+void http_rest_client_add_header(char* header_key, char* header_value) {
+    headers[headers_c] = header_key;
+    values[headers_c] = header_value;
+    headers_c++;
+}
+
+esp_err_t http_rest_client_set_headers(esp_http_client_handle_t client) {
+    esp_err_t ret = ESP_OK;
+    for (int i = 0; i < headers_c; i++) {
+	ret = esp_http_client_set_header(client, headers[i], values[i]);
+    }
+    return ret;
+}
+
+void http_rest_client_clear_headers() {
+    for (int i = 0; i < headers_c; i++) {
+	headers[i] = NULL;	
+	values[i] = NULL;
+    }
+    headers_c = 0;
+}
+
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len)
 {
   if (certificate != NULL)
@@ -88,6 +115,11 @@ esp_err_t http_rest_client_get(char *url, http_rest_recv_buffer_t *http_rest_rec
   client = esp_http_client_init(&config);
 
   esp_http_client_set_header(client, "Content-Type", "application/json");
+  ret = http_rest_client_set_headers(client);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to set headers");
+    return ret;
+  }
 
   ret = esp_http_client_perform(client);
 
@@ -195,6 +227,11 @@ esp_err_t http_rest_client_delete(char *url, http_rest_recv_buffer_t *http_rest_
   client = esp_http_client_init(&config);
 
   esp_http_client_set_header(client, "Content-Type", "application/json");
+  ret = http_rest_client_set_headers(client);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to set headers");
+    return ret;
+  }
 
   ret = esp_http_client_perform(client);
 
@@ -247,6 +284,11 @@ esp_err_t http_rest_client_post(char *url, char *body_data, http_rest_recv_buffe
   client = esp_http_client_init(&config);
 
   esp_http_client_set_header(client, "Content-Type", "application/json");
+  ret = http_rest_client_set_headers(client);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to set headers");
+    return ret;
+  }
 
   esp_http_client_set_post_field(client, body_data, strlen(body_data));
 
@@ -301,6 +343,11 @@ esp_err_t http_rest_client_put(char *url, char *body_data, http_rest_recv_buffer
   client = esp_http_client_init(&config);
 
   esp_http_client_set_header(client, "Content-Type", "application/json");
+  ret = http_rest_client_set_headers(client);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to set headers");
+    return ret;
+  }
 
   esp_http_client_set_post_field(client, body_data, strlen(body_data));
 
@@ -331,5 +378,6 @@ void http_rest_client_cleanup(http_rest_recv_buffer_t *http_rest_recv_buffer)
   {
     free(http_rest_recv_buffer->buffer);
   }
+  http_rest_client_clear_headers();
   ESP_LOGD(TAG, "Cleaned up http_rest_recv_buffer");
 }

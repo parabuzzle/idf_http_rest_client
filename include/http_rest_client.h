@@ -36,6 +36,9 @@
 #include "esp_crt_bundle.h"
 #endif
 
+// Custom Headers Implementation
+void http_rest_client_add_header(char* header_key, char* header_value);
+
 /* Certificate handling */
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len);
 esp_err_t http_rest_client_deinit_cert(void);
