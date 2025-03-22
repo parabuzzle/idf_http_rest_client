@@ -29,6 +29,10 @@
 
 #include "cJSON.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct http_rest_recv_buffer_t
 {
   uint8_t *buffer;
@@ -43,3 +47,7 @@ typedef struct http_rest_recv_json_t
   int status_code;
 
 } http_rest_recv_json_t;
+
+#ifdef __cplusplus
+}
+#endif

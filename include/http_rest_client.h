@@ -36,6 +36,10 @@
 #include "esp_crt_bundle.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Certificate handling */
 esp_err_t http_rest_client_init_cert(char *cert, size_t cert_len);
 esp_err_t http_rest_client_deinit_cert(void);
@@ -47,3 +51,7 @@ esp_err_t http_rest_client_post(char *url, char *body_data, http_rest_recv_buffe
 esp_err_t http_rest_client_put(char *url, char *body_data, http_rest_recv_buffer_t *http_rest_recv_buffer);
 
 void http_rest_client_cleanup(http_rest_recv_buffer_t *http_rest_recv_buffer);
+
+#ifdef __cplusplus
+}
+#endif
